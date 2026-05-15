@@ -9,7 +9,7 @@ pub const ST7789 = struct {
     rst_pin: rp2xxx.gpio.Pin,
     blk_pin: ?rp2xxx.gpio.Pin,
 
-    rowstart: u16 = 0, // Оффсет для 240x240
+    rowstart: u16 = 0,
     colstart: u16 = 0,
     width: u16 = 240,
     height: u16 = 240,
@@ -26,25 +26,21 @@ pub const ST7789 = struct {
     };
 
     pub fn init(comptime config: Config) Self {
-        // Настройка SPI пинов
         const sck_p = rp2xxx.gpio.num(config.sck);
         const mosi_p = rp2xxx.gpio.num(config.mosi);
         sck_p.set_function(.spi);
         mosi_p.set_function(.spi);
 
-        // Настройка DC пина
         const dc_p = rp2xxx.gpio.num(config.dc);
         dc_p.set_function(.sio);
         dc_p.set_direction(.out);
         dc_p.put(1);
 
-        // Настройка Reset пина
         const rst_p = rp2xxx.gpio.num(config.rst);
         rst_p.set_function(.sio);
         rst_p.set_direction(.out);
         rst_p.put(1);
 
-        // Настройка подсветки (если есть)
         var blk: ?rp2xxx.gpio.Pin = null;
         if (config.blk) |blk_num| {
             const b = rp2xxx.gpio.num(blk_num);
@@ -125,6 +121,10 @@ pub const ST7789 = struct {
 
     pub fn fillScreen(self: *Self, color: u16) void {
         self.fillRect(0, 0, self.width, self.height, color);
+    }
+
+    pub fn clear(self: *Self, color: u16) void {
+        self.fillScreen(color);
     }
 
     pub fn drawChar(self: *Self, x: u16, y: u16, char: u8, color: u16, size: u8) void {
